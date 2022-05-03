@@ -1,0 +1,6 @@
+name: opensense_sandbox
+dependencies:
+  - r-ggplot2
+  - r-ncdf4
+  - numpy
+  - pandas
