@@ -5,6 +5,7 @@ dependencies:
   - r-ggplot2
   - r-ncdf4
   - numpy
+  - matplotlib    
   - pandas
   - xarray
   - netcdf4    
