@@ -42,3 +42,9 @@ With `conda` set up, follow these steps:
 ## Contributing
 
 The easiest way is to fork the repository and submit a pull request (PR). Each PR automatically gets its own mybinder button to test everything in its defined environment. If required we can also have dev branches in this repo.
+
+Note that you can update your local `conda` env based on an updated `environment.yml` file like this (see [here](https://stackoverflow.com/a/43873901/356463))
+```
+conda activate myenv
+conda env update --file environment.yml --prune
+```
