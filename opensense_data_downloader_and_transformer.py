@@ -75,7 +75,54 @@ def tranform_fencl_2021_Eband_data(fn):
             ),
         )
         return ds
+
+    
+# 6 Eband CMLs from Czech Republic
+
+download_fencl_2020_Eband_data = partial(
+    download_data_file,
+    url="https://zenodo.org/record/4090953/files/dataset.zip",
+)
+
+def transform_fencl_2020_Eband_data(fn):
+    ds_list = []
+    with zipfile.ZipFile(fn) as zfile:
+        # read metadata
+        df_metadata = pd.read_csv(
+            zfile.open('raw/commercial_microwave_links_total_loss/metadata_table_commercial_microwave_links.csv'),
+            index_col=0,
+            sep=';',
+        )
         
+        for i, row in df_metadata.iterrows():
+            for ab in ['a', 'b']:
+                raw_data_fn = os.path.join('raw/commercial_microwave_links_total_loss', f'{i}{ab}.csv')
+                print(f'Parsing raw data from {raw_data_fn}')
+                # get file handle for CSV files stored in the ZIP file    
+                f = zfile.open(raw_data_fn)
+                df_data = pd.read_csv(
+                    f,
+                    index_col=0,
+                    parse_dates=True,
+                    sep=';',
+                )
+                ds_list.append(
+                    xr.Dataset(
+                        data_vars={'trsl': (('time'), df_data.total_loss)},
+                        coords=dict(
+                            time=df_data.index.values,
+                            cml_id=row.id_old,
+                            length=row.length/1e3,
+                            frequency=row[f'freq{ab.upper()}'],
+                            site_a_longitude=row.lonA,
+                            site_b_longitude=row.lonB,
+                            site_a_latitude=row.latA,
+                            site_b_latitude=row.latB,
+                        ),
+                    )
+                )
+    return ds_list
+
 
 # Dutch CML data from https://data.4tu.nl/ndownloader/files/24025658
 
@@ -168,3 +215,5 @@ def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
     ds2012 = xr.concat(ds_list, dim="cml_id")
 
     return ds2012
+
+
