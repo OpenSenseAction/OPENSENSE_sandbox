@@ -1,9 +1,15 @@
 # ugly WIP code, copy-paste from dev notebook
 
-def download_data_file(url, local_path=".", local_file_name=None, print_output=False):
-    import os
-    import urllib
+import os
+import urllib
+import zipfile
+from functools import partial
 
+import pandas as pd
+import xarray as xr
+
+
+def download_data_file(url, local_path=".", local_file_name=None, print_output=False):
     if not os.path.exists(local_path):
         if print_output:
             print(f"Creating path {local_path}")
@@ -29,17 +35,49 @@ def download_data_file(url, local_path=".", local_file_name=None, print_output=F
     return request_return_meassage
 
 
-from functools import partial
 
-download_pycomlink_example_data = partial(
-    download_data_file,
-    url="https://github.com/pycomlink/pycomlink/raw/master/pycomlink/io/example_data/example_cml_data.nc",
-)
+# Single Eband CML data from Czech Republic
 
 download_fencl_2021_Eband_data = partial(
     download_data_file,
     url="https://zenodo.org/record/5013463/files/Dataset_1.0.0.zip",
 )
+
+def tranform_fencl_2021_Eband_data(fn):
+    # open ZIP file
+    with zipfile.ZipFile(fn) as zfile:
+        # get file handle for CSV file stored in the ZIP file
+        f = zfile.open("data_metedata/commercial_microwave_link_total_loss/cml_total_loss.csv")
+        # Parse data from file
+        df_data = pd.read_csv(
+            f,
+            index_col=0,
+            parse_dates=True,
+            sep=';',
+        )
+        # Build xarray.Dataset. Here we used hardcoded metadata (taken from the metadata
+        # file in the ZIP file) since there is only one CML and since the metadata file
+        # is hard to parse
+        ds = xr.Dataset(
+            data_vars={
+                'trsl': (('sublink_id', 'time'), [df_data.s73.values, df_data.s83.values]),
+                'frequency': (('sublink_id'), [73.5, 83.5]),
+            },
+            coords=dict(
+                time=df_data.index.values,
+                cml_id='cz_example_cml_1',
+                length=4.866,
+                sublink_id=(('sublink_id'), ['ab', 'ba']),
+                site_a_longitude=14.53,
+                site_b_longitude=14.53, # coordinates have been rounded for publication...
+                site_a_latitude=50.03,
+                site_b_latitude=50.03,
+            ),
+        )
+        return ds
+        
+
+# Dutch CML data from https://data.4tu.nl/ndownloader/files/24025658
 
 download_overeem_2019_large_CML_data_Netherlands = partial(
     download_data_file,
@@ -47,12 +85,7 @@ download_overeem_2019_large_CML_data_Netherlands = partial(
     local_file_name="data.zip",
 )
 
-
 def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
-    import zipfile
-    import pandas as pd
-    import xarray as xr
-
     # open ZIP file
     with zipfile.ZipFile(fn) as zfile:
         # get file handle for CSV file stored in the ZIP file
