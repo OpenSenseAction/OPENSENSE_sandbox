@@ -217,3 +217,39 @@ def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
     return ds2012
 
 
+# OpenMRG dataset from SMHI
+
+download_andersson_2022_OpenMRG = partial(
+    download_data_file,
+    url="https://zenodo.org/record/6673751/files/OpenMRG.zip",
+)
+
+def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
+    # For this ZIP file we cannot extract only the CML data since
+    # the NetCDF with the CML data is quite large. This seems to
+    # lead to crashes when reding directly from the ZIP file via Python.
+    with zipfile.ZipFile(fn) as zfile:
+        zfile.extractall(path_to_extract_to)
+    
+    # Read metadata and data
+    df_metadata = pd.read_csv(os.path.join(path_to_extract_to, 'cml/cml_metadata.csv'), index_col=0)
+    ds = xr.open_dataset(os.path.join(path_to_extract_to, 'cml/cml.nc'))
+    
+    # Add metadata with naming convention as currently used in pycomlink example data file
+    for col_name, ds_var_name in [
+        ('NearLatitude_DecDeg', 'site_a_latitude'),
+        ('NearLongitude_DecDeg', 'site_a_longitude'),
+        ('FarLatitude_DecDeg', 'site_b_latitude'),
+        ('FarLongitude_DecDeg', 'site_b_longitude'),
+        ('Frequency_GHz', 'frequency'),
+        ('Polarization', 'polarization'),
+        ('Length_km', 'length'),
+    ]:
+        ds.coords[ds_var_name] = (
+            ('sublink'), 
+            [df_metadata[df_metadata.Sublink==sublink_id][col_name].values[0] for sublink_id in list(ds.sublink.values)]
+        )
+        
+    ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+    
+    return ds
