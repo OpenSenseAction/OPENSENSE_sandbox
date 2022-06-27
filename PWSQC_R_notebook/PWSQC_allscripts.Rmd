@@ -369,9 +369,9 @@ for(s in 1:length(StationSelec)){
   N_ac <-  cumsum(ifelse(is.na(Ndataset2[,StationSelec[s]]), 0, Ndataset2[,StationSelec[s]])) + Ndataset2[,StationSelec[s]]*0 
   lines(Time, N_ac, col="darkgrey") # makes cumulative plots even if values are missing. 
   
-  points(Time[which(FZ_flags[,StationSelec[s]]==1)], Ndataset2[,StationSelec[s]][which(FZ_flags[,StationSelec[s]]==1)], col="red") # plot intervals with FZ flag
-  points(Time[which(HI_flags[,StationSelec[s]]==1)], Ndataset2[,StationSelec[s]][which(HI_flags[,StationSelec[s]]==1)], col="orange") # plot intervals with HI flag  
-  points(Time[which(SO_flags[,StationSelec[s]]==1)], Ndataset2[,StationSelec[s]][which(SO_flags[,StationSelec[s]]==1)], col="green") # plot intervals with HI flag  
+  points(Time[which(FZ_flags[,StationSelec[s]]==1)], N_ac[which(FZ_flags[,StationSelec[s]]==1)], col="red") # plot intervals with FZ flag
+  points(Time[which(HI_flags[,StationSelec[s]]==1)], N_ac[which(HI_flags[,StationSelec[s]]==1)], col="orange") # plot intervals with HI flag  
+  points(Time[which(SO_flags[,StationSelec[s]]==1)], N_ac[which(SO_flags[,StationSelec[s]]==1)], col="green") # plot intervals with HI flag  
 }
 legend("topleft", legend=c("FZ-flag", "HI-flag", "SO-flag"), pch=1, col=c("red", "orange", "green"))
 
