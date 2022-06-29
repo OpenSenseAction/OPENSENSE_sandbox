@@ -4,6 +4,11 @@ dependencies:
   - r-essentials  
   - r-ggplot2
   - r-ncdf4
+  - r-data.table
+  - r-geosphere
+  - r-sf
+  - r-s2
+  - r-TeachingDemos
   - numpy
   - matplotlib    
   - pandas
