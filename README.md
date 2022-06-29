@@ -41,10 +41,20 @@ With `conda` set up, follow these steps:
 
 ## Contributing
 
-The easiest way is to fork the repository and submit a pull request (PR). Each PR automatically gets its own mybinder button to test everything in its defined environment. If required we can also have dev branches in this repo.
+We encourages everyone to contribute to the developement of the OPENSENSE_sandbox.
 
-Note that you can update your local `conda` env based on an updated `environment.yml` file like this (see [here](https://stackoverflow.com/a/43873901/356463))
+The easiest way is to fork the repository and submit a pull request (PR). Each PR automatically gets its own mybinder button to test everything in its defined environment. PRs will be iterated with and merged by the repository maintainers. If required we can also have dev branches in this repository.
+
+Note that, if you have to change the dependencies, you can update your local `conda` env based on an updated `environment.yml` file like this (see [here](https://stackoverflow.com/a/43873901/356463))
 ```
 conda activate myenv
 conda env update --file environment.yml --prune
 ```
+
+## Code of Conduct
+
+Contributors to the OPENSENSE_sandbox are expected to act respectfully toward others in accordance with the [OSGeo Code of Conduct](http://www.osgeo.org/code_of_conduct).
+
+## Contributions and Licensing
+
+All contributions shall comply to the project [license](LICENSE). The individual included packages might have their own license, which has to be compatible with the one of the project license.
