@@ -1,5 +1,6 @@
 name: opensense_sandbox
 dependencies:
+  - python=3.10.6
   # Some basic R packages
   - r-base=4.1.3
   - r-essentials  
