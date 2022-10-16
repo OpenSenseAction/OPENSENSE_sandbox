@@ -4,13 +4,19 @@ dependencies:
   - r-base=4.1.3
   - r-essentials  
   - r-ggplot2
-  - r-ncdf4
+  - r-ncdf4  
+  - r-data.table
+  - r-geosphere
+  - r-sf
+  - r-s2
+  - r-TeachingDemos
   # Some basic Python packages
   - numpy
   - matplotlib    
   - pandas
   - xarray
   - netcdf4
+  - dask
   # Additional dependencies for pycomlink
   - scipy
   - numba

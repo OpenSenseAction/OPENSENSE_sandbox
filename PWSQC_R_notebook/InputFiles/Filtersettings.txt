@@ -1,0 +1,67 @@
+# In case you want to produce results with different settings, change the label 'Filtersettings' of each set of parameter settings. This label will be included in the filename of the output so results aren't overwritten. 
+# See more information on how the filtersettings relate to the filter below. 
+
+	Filtersettings <- "A"
+
+ # FZ filter #
+	range <- 10000 	# range in meter
+	nstat <- 5	# minimum requirement of measurements in the surounding area
+	nint <- 6	# more than 6 consequetive intervals of 5 min need to be dry in order to call it a faulty zero measurement (>30 min)
+
+ # HI filter #
+	HIthresA <- 0.4	# in mm
+	HIthresB <- 10	# in mm
+
+ # SO filter #
+	compareint <- 12*24*7*2	# number of 5 min intervals over which the correlation and bias are calculated, here 2 weeks 
+	rainyint <- 100		# number of 5 min intervals that have nonzero values to calculate bias and correlation on
+	matchint <- 200		# number of 5 min intervals that should at least overlap with neighbouring station observations for the neighbourstation to be included
+	corthres <- 0.15	# exclude station when the median of correlations with neighbouring stations is lower than corthres
+
+ # bias correction: #
+	defaultbiascorrection <- 1.24	# The defaultbiascorrection is determined as 1 / (1+B), where B is the estimated overall bias of the complete network.  
+	biasthres <- 0.2	# 1/(1+biasthres) > BCFnew /BCFprev > 1+biasthres leads to an adjustment in BCF
+
+
+
+ # # # # # # 
+
+ # FZ filter #
+ # Stations are compared with neighbouring stations within a range of 'range' meter. 
+ # FZ = 1 after 'nint' consecutive 5 min intervals a station actively reports zero rainfall (i.e. not missing values) while the median of neighbourstations indicates nonzero (not NA) during that complete period. 
+ # When the median cannot be constructed on at least 'nstat' stations, the FZflag is -1. 
+ # The flagging starts after these criteria are met, and continue until the station actively reports nonzero rainfall. 
+	#range 		# range in meter
+	#nstat		# minimum requirement of measurements in the surounding area
+	#nint		# more than 6 consequetive intervals of 5 min need to be dry in order to call it a faulty zero measurement (>30 min)
+
+ # HI filter #
+ # A rainfall measurement that is significantly larger than the surrounding observations is flagged as HI. 
+ # If the median is lower than 'HIthresA', the observation is flagged when it is larger than 'HIthresB'. 
+ # If the median is equal or larger than 'HIthresA', the observation is flagged when it is lager than median*'HIthresB'/'HIthresA'
+	#HIthresA	# in mm
+	#HIthresB	# in mm
+
+ # SO filter #
+ # Stations are considered outliers when they show very different rainfall dynamics than their neigbours. 
+ # This is determined by calculating the correlation over a previous period with all neighbourstations, after filtering out the FZ and HI flagged intervals in the dataset. 
+ # The period has length 'compareint' intervals, or if not enough rain has occured, any longer period so that the number of nonzero rainfall measurements in the evaluated timeserie are at least 'rainyint'. 
+ # The median of the Pearson correlations with all neigbouring stations is calculated, provided they have at least 'matchint' number of overlapping intervals. 
+ # If there are fewer than 'nstat' stations with whom the correlation could be calculated, the SO flag is -1. 
+ # If the median of the correlations is below 'corthres' the SO flag is given.
+ # This means that the SO flagging stops when the station has a period of at least 'compareint' where the median of correlations with neighbours exceeds 'corthres'. 
+	#compareint	# number of 5 min intervals over which the correlation and bias are calculated, here 2 weeks. 
+	#rainyint	# number of 5 min intervals that have nonzero values to calculate bias and correlation on.
+	#matchint	# number of 5 min intervals that should at least overlap with neighbouring station observations for the neighbourstation to be included. 
+	#corthres	# exclude station when the median of correlations with neighbouring stations is lower than corthres. 
+
+ # bias correction: #
+ # The default of the bias correction is based on the filterd bias values with the gauge adjusted radar reference in the first month of the dataset, May 2016.
+ # The default biascorrection is set at 1/(B+1)
+ # The PWS stations have a tendency to underestimate the rainfall. A default bias correction is introduced. By comparing each station with their (filtered) neigbours, this bias correction can be adjusted. 
+ # The bias is calculated over a previous period of 'compareint', or whatever period where at least 'rainyint' intervals with nonzero values, provided there are at least 'matchint' overlapping intervals.  
+ # This is done when the median of correlation with neighbouring stations is above 'corthres', and the median of bias with neighbouring stations deviates more than 'biasthres'.
+ # If there are less than 'nstat' stations available, no bias correction adjustment is performed and the biascorrection of the previous timestep is maintained. 
+ # The bias of the raw timeseries over the previous time period with the other timelines multiplied with 'defaultbiascorrection' is calculated. If the median of those bias values deviates more than 'biasthres' from the previous biascorrection (as it should when there is no change in bias), the median bias value is stored as the new value. As start the defaultbiascorrection is chosen. 
+	#defaultbiascorrection 	# determined based on the proxy of the bias of the overall PWS network.
+	#biasthres 		# the range over which the biascorrectionfactor is allowed to vary (equally severely for over- and underestimation): if 1/(1+biasthres) > BCFnew /BCFprev > 1+biasthres is true the BCFnew replaces BCFprev. 

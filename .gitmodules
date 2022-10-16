@@ -4,3 +4,6 @@
 [submodule "RAINLINK"]
 	path = RAINLINK
 	url = https://github.com/overeem11/RAINLINK.git
+[submodule "PWSQC"]
+	path = PWSQC
+	url = https://github.com/LottedeVos/PWSQC
