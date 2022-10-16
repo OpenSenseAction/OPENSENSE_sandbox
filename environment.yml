@@ -16,8 +16,8 @@ dependencies:
   - matplotlib    
   - pandas
   - xarray
-  - netcdf4
   - dask
+  - netcdf4
   # Additional dependencies for pycomlink
   - scipy
   - numba
