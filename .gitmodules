@@ -7,3 +7,6 @@
 [submodule "PWSQC"]
 	path = PWSQC
 	url = https://github.com/LottedeVos/PWSQC
+[submodule "pws-pyqc"]
+	path = pws-pyqc
+	url = https://github.com/AbbasElHachem/pws-pyqc.git
