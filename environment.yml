@@ -11,6 +11,11 @@ dependencies:
   - r-sf
   - r-s2
   - r-TeachingDemos
+  - r-gstat
+  - r-hexbin
+  - r-sfheaders
+  - r-abind
+  - r-stars
   # Some basic Python packages
   - numpy
   - matplotlib    
