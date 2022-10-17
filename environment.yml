@@ -29,3 +29,6 @@ dependencies:
   - tensorflow
   - bottleneck
   - future
+  # Additional dependencies for PyNNcml
+  - torch
+  - torchvision
