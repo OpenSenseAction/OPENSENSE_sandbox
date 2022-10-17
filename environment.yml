@@ -1,4 +1,6 @@
 name: opensense_sandbox
+channels:
+  - conda-forge
 dependencies:
   - python=3.10.6
   # Some basic R packages
