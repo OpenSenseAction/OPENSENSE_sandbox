@@ -7,3 +7,6 @@
 [submodule "PWSQC"]
 	path = PWSQC
 	url = https://github.com/LottedeVos/PWSQC
+[submodule "PyNNcml"]
+	path = PyNNcml
+	url = https://github.com/haihabi/PyNNcml
