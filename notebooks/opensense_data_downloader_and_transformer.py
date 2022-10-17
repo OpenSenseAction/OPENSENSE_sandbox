@@ -221,7 +221,7 @@ def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
 
 download_andersson_2022_OpenMRG = partial(
     download_data_file,
-    url="https://zenodo.org/record/6673751/files/OpenMRG.zip",
+    url="https://zenodo.org/record/7107689/files/OpenMRG.zip",
 )
 
 def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
