@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox/main?filepath=intro_to_R.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox?filepath=intro_to_R.ipynb&branch=main)
 
 <img src="https://user-images.githubusercontent.com/102827/174779884-a2fb0971-4850-4ad6-93eb-2c53b922b408.svg" alt="drawing" width="300"/>
 
