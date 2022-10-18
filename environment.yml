@@ -40,3 +40,8 @@ dependencies:
   # Additional dependencies for PyNNcml
   - cpuonly
   - pytorch
+  # Additional dependencies for MapRAINLINK
+  - cartopy
+  - copy
+  - os
+  - sys
