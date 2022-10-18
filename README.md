@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/georges-schutz/OPENSENSE_sandbox_outsource_environment&urlpath=tree/OPENSENSE_sandbox_outsource_environment/intro_to_R.ipynb&branch=main) 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252Fgeorges-schutz%252FOPENSENSE_sandbox_outsource_environment%26urlpath%3Dtree%252FOPENSENSE_sandbox_outsource_environment%252Fintro_to_R.ipynb%26branch%3Dmain) 
 
 Next test the button URL using this template
 https://mybinder.org/v2/gh/<your-username>/<your-environment-repo>/main?urlpath=git-pull?repo=<url-of-your-content-repo>
