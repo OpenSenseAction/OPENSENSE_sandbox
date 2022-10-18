@@ -1,11 +1,12 @@
 name: opensense_sandbox
 channels:
   - conda-forge
+  - pytorch
 dependencies:
   - python=3.10.6
   # Some basic R packages
   - r-base=4.1.3
-  - r-essentials  
+  - r-essentials
   - r-ggplot2
   - r-ncdf4
   - r-data.table
@@ -15,7 +16,7 @@ dependencies:
   - r-TeachingDemos
   # Some basic Python packages
   - numpy
-  - matplotlib    
+  - matplotlib
   - pandas
   - xarray
   - dask
@@ -31,3 +32,6 @@ dependencies:
   - tensorflow
   - bottleneck
   - future
+  # Additional dependencies for PyNNcml
+  - cpuonly
+  - pytorch
