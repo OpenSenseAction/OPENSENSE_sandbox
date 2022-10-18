@@ -7,3 +7,6 @@
 [submodule "PWSQC"]
 	path = PWSQC
 	url = https://github.com/LottedeVos/PWSQC
+[submodule "MapRAINLINK"]
+	path = MapRAINLINK
+	url = https://github.com/overeem11/MapRAINLINK
