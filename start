@@ -1,0 +1,13 @@
+#!/bin/bash
+
+OPENSENSE_SANDBOX="OPENSENSE_sandbox_outsource_environment"
+SUBMODULS=("pws-pyqc","PyNNcml")
+
+for sub_module in ${SUBMODULS[@]}; do
+  echo $sub_module
+done
+
+export PYTHONPATH="${PYTHONPATH}:~/${OPENSENSE_SANDBOX}/pws-pyqc"
+
+echo ${PYTHONPATH}
+#exec "$@"
