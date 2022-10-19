@@ -9,5 +9,13 @@ done
 
 export PYTHONPATH
 
-echo ${PYTHONPATH}
+echo 'PYTHONPATH=' ${PYTHONPATH}
+
+echo ''
+echo 'get content of submodules'
+git submodule update --init
+
+echo ''
+echo 'done'
+
 #exec "$@"
