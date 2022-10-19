@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# just to test if the script is run...
+touch foo.bar
+
 OPENSENSE_SANDBOX="OPENSENSE_sandbox_outsource_environment"
 SUBMODULS=("pws-pyqc", "PyNNcml", "pycomlink")
 
