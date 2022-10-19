@@ -5,7 +5,8 @@ SUBMODULS=("pws-pyqc", "PyNNcml", "pycomlink")
 
 echo 'add Python submodules to path'
 for sub_module in ${SUBMODULS[@]}; do
-  PYTHONPATH="${PYTHONPATH}:~/${OPENSENSE_SANDBOX}/${sub_module}"
+  python -c 'import sys; sys.path.append("${sub_module}")'
+  #PYTHONPATH="${PYTHONPATH}:~/${OPENSENSE_SANDBOX}/${sub_module}"
 done
 
 export PYTHONPATH
