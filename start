@@ -1,8 +1,9 @@
 #!/bin/bash
 
 OPENSENSE_SANDBOX="OPENSENSE_sandbox_outsource_environment"
-SUBMODULS=("pws-pyqc", "PyNNcml")
+SUBMODULS=("pws-pyqc", "PyNNcml", "pycomlink")
 
+echo 'add Python submodules to path'
 for sub_module in ${SUBMODULS[@]}; do
   PYTHONPATH="${PYTHONPATH}:~/${OPENSENSE_SANDBOX}/${sub_module}"
 done
@@ -17,5 +18,10 @@ git submodule update --init
 
 echo ''
 echo 'done'
+
+echo ''
+echo 'Install RAINLINK'
+cd RAINLINK
+R CMD INSTALL RAINLINK*.tar.gz
 
 #exec "$@"
