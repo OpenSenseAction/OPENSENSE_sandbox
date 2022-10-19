@@ -22,8 +22,9 @@ With `conda` set up, follow these steps:
    ```
    git clone --recursive https://github.com/OpenSenseAction/OPENSENSE_sandbox.git
    ```
-2. Go to this directory and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` is available. Please refer to the `conda` docs to find out how to achieve that.
+2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` is available. Please refer to the `conda` docs to find out how to achieve that.
    ```
+   wget https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment/blob/main/environment.yml
    conda env create environment.yml
    ```
 3. Activate the env.
