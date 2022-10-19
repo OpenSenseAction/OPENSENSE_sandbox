@@ -29,4 +29,4 @@ echo ''
 echo 'create dir in RAINLINK for figures'
 mkdir Figures
 
-#exec "$@"
+$@
