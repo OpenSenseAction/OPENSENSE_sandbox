@@ -24,4 +24,8 @@ echo 'Install RAINLINK'
 cd RAINLINK
 R CMD INSTALL RAINLINK*.tar.gz
 
+echo ''
+echo 'create dir in RAINLINK for figures'
+mkdir Figures
+
 #exec "$@"
