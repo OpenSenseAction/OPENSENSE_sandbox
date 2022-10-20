@@ -39,7 +39,7 @@ With `conda` set up, follow these steps:
    ```
    jupyter-lab
    ```
-6. Got to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
+6. Go to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
 
 ## Contributing
 
