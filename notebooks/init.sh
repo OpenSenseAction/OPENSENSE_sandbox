@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source activate opensense_sandbox
-
 echo 'Running with the following python binary'
 which python
 
