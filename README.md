@@ -13,7 +13,7 @@ Even though this repo is WIP, feel free to try out the preliminary notebooks by 
 
 ## Run environment locally
 
-To run the code locally and/or to contribute to this repository, you need to set up the `conda` environment defined in the file `environment.yml` which is also used by mybinder to build the environment that you run online.
+To run the code locally and/or to contribute to this repository, you need to set up the `conda` environment defined in the file `environment.yml` (located in the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment)) which is also used by mybinder to build the environment that you run online.
 
 First, you need to have `conda` installed. If this is you first installation of `conda` we recommend to start with the `mambaforge` installer which is available for Windows, Linux and Mac [here](https://github.com/conda-forge/miniforge#mambaforge). Note that "mamba" is just a faster implementation of "conda", and "forge" refers to the fact that you will use the community packages from the [conda-forge "channel"](https://conda-forge.org/), which has a  larger choice of scientific Python and R packages than the default conda "channel".
 
@@ -39,6 +39,7 @@ With `conda` set up, follow these steps:
    ```
    jupyter-lab
    ```
+6. Got to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
 
 ## Contributing
 
