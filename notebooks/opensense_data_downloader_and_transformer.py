@@ -268,6 +268,25 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
     return ds
 
 
+def transform_German_CML_data(fn):
+    
+    ds = xr.open_dataset(fn)
+    
+    # rename according to new conventions
+    ds = ds.rename({
+        "site_a_latitude": "site_0_lat",
+        "site_a_longitude": "site_0_lon",
+        "site_b_latitude": "site_1_lat",
+        "site_b_longitude": "site_1_lon",
+        "channel_id": "sublink_id",
+    })
+    
+    # add standard attributes
+    ds = add_cml_attributes(ds)
+    
+    return ds
+
+
 def add_cml_attributes(ds):
     
     # dictionary of optional and required attributes for variables
