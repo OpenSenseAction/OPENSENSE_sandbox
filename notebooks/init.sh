@@ -13,6 +13,7 @@ echo ''
 echo 'add python submodules to conda env...'
 conda develop pycomlink
 conda develop PyNNcml
+conda develop cml_data_explorer
 # not sure if we need this one since it currently is not 
 # used in the example notebook of Abbas which defines all
 # required functions inside the notebook
