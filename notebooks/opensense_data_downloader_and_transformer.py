@@ -90,9 +90,9 @@ download_fencl_2020_Eband_data = partial(
     url="https://zenodo.org/record/4090953/files/dataset.zip",
 )
 
-def transform_fencl_2020_Eband_data(fn):
+def transform_fencl_2020_Eband_data(local_path, fn):
     ds_list = []
-    with zipfile.ZipFile(fn) as zfile:
+    with zipfile.ZipFile(local_path + fn) as zfile:
         # read metadata
         df_metadata = pd.read_csv(
             zfile.open('raw/commercial_microwave_links_total_loss/metadata_table_commercial_microwave_links.csv'),
@@ -112,6 +112,7 @@ def transform_fencl_2020_Eband_data(fn):
                     parse_dates=True,
                     sep=';',
                 )
+                
                 ds_list.append(
                     xr.Dataset(
                         data_vars={'tl': (('time'), df_data.total_loss)},
@@ -344,12 +345,16 @@ def add_cml_attributes(ds):
         },         
         'tsl': {
             "units": "dBm",
-            "long_name": "Transmitted signal level",
+            "long_name": "transmitted_signal_level",
         },             
         'rsl': {
             "units": "dBm",
-            "long_name": "Received signal level",
-        },   
+            "long_name": "received_signal_level",
+        },
+        'polarization': {
+            "units": "no units",
+            "long_name": "sublink_polarization",
+        }
     }
     
     # list of global attributes according to white paper draft
