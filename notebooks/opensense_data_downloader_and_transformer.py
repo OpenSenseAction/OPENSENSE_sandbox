@@ -204,7 +204,7 @@ def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
         ds_list.append(
             xr.Dataset(
                 data_vars=dict(
-                    pmin=("time", df_sel.pmin.values), pmax=("time", df_sel.pmax.values)
+                    rsl_min=("time", df_sel.pmin.values), rsl_max=("time", df_sel.pmax.values)
                 ),
                 coords=dict(
                     time=df_sel.index.values,
@@ -263,6 +263,9 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
         
     ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
     
+    # Change "sublink" to "sublink_id"
+    ds = ds.rename({"sublink": "sublink_id"})
+    
     # add standard attributes
     ds = add_cml_attributes(ds)
     
@@ -291,76 +294,142 @@ def transform_German_CML_data(fn):
 def add_cml_attributes(ds):
     
     # dictionary of optional and required attributes for variables
-    # according to white paper draft
+    # and coordinates according to OpenSense white paper
     dict_attributes = {
         "time": {
-            "units": "s",
-            "long_name": "time_utc"
+            # "units": "s",    # defining units here interferes with encoding units of time
+            "long_name": "time_utc",
+            # "missing_value": "",   # defining units here interferes with encoding
         },
         "cml_id": {
-            "long_name": "commercial_microwave_link_identifier"
+            "long_name": "commercial_microwave_link_identifier",
         },
-        'sublink_id': {
-            "long_name": "sub-link_identifier"
+        "sublink_id": {
+            "long_name": "sublink_identifier",
         },
-        'site_0_lat': {
-            "units": "degrees in WGS84 projection",
+        "site_0_lat": {
+            "units": "degrees_in_WGS84_projection",
             "long_name": "site_0_latitude",
         },
-        'site_0_lon': {
-            "units": "degrees in WGS84 projection",
+        "site_0_lon": {
+            "units": "degrees_in_WGS84_projection",
             "long_name": "site_0_longitude",
         },      
-        'site_0_elevation': {
+        "site_0_elev": {
             "units": "meters_above_sea",
             "long_name": "ground_elevation_above_sea_level",
         },     
-        'site_0_altitude': {
+        "site_0_alt": {
             "units": "meters_above_sea",
             "long_name": "antenna_altitude_above_sea_level",
         }, 
-        'site_1_lat': {
+        "site_1_lat": {
             "units": "degrees in WGS84 projection",
             "long_name": "site_1_latitude",
         },
-        'site_1_lon': {
+        "site_1_lon": {
             "units": "degrees in WGS84 projection",
             "long_name": "site_1_longitude",
         },               
-        'site_1_elevation': {
+        "site_1_elev": {
             "units": "meters_above_sea",
             "long_name": "ground_elevation_above_sea_level",
         },     
-        'site_1_altitude': {
+        "site_1_alt": {
             "units": "meters_above_sea",
             "long_name": "antenna_altitude_above_sea_level",
         },    
-        'length': {
+        "length": {
             "units": "m",
             "long_name": "distance_between_pair_of_antennas",
         },                
-        'frequency': {
+        "frequency": {
             "units": "MHz",
             "long_name": "sublink_frequency",
-        },         
-        'tsl': {
-            "units": "dBm",
-            "long_name": "transmitted_signal_level",
-        },             
-        'rsl': {
-            "units": "dBm",
-            "long_name": "received_signal_level",
         },
-        'polarization': {
+        "polarization": {
             "units": "no units",
             "long_name": "sublink_polarization",
-        }
+            "missing_value": "",
+        },
+        "tsl": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "transmitted_signal_level",
+            "missing_value": "",
+        },             
+        "rsl": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "received_signal_level",
+            "missing_value": "",            
+        },
+        "tsl_max": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "maximum_transmitted_signal_level_over_time_window",
+            "missing_value": "",
+        },             
+        "tsl_min": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "minimum_transmitted_signal_level_over_time_window",
+            "missing_value": "",            
+        },             
+        "tsl_avg": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "averaged_transmitted_signal_level_over_time_window",
+            "missing_value": "",            
+        },           
+        "tsl_inst": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "instantaneous_transmitted_signal_level",
+            "missing_value": "",            
+        },
+        "rsl_max": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "maximum_received_signal_level_over_time_window",
+            "missing_value": "",
+        },             
+        "rsl_min": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "minimum_received_signal_level_over_time_window",
+            "missing_value": "",            
+        },             
+        "rsl_avg": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "averaged_received_signal_level_over_time_window",
+            "missing_value": "",            
+        },           
+        "rsl_inst": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "instantaneous_received_signal_level",
+            "missing_value": "",            
+        },           
+        "temperature_0": {
+            "units": "degrees_of_celsius",
+            "coordinates": "cml_id, time",
+            "long_name": "sensor_temperature_at_site_0",
+            "missing_value": "",            
+        },
+        "temperature_1": {
+            "units": "degrees_of_celsius",
+            "coordinates": "cml_id, time",            
+            "long_name": "sensor_temperature_at_site_1",
+            "missing_value": "",            
+        },
     }
     
-    # list of global attributes according to white paper draft
+    # list of global attributes according to white paper
     global_attr_vars = [
         "title",
-        "file author/s",
+        "file author(s)",
         "institution",
         "date",
         "source",
