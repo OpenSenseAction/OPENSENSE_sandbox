@@ -60,7 +60,7 @@ def tranform_fencl_2021_Eband_data(fn):
         # is hard to parse
         ds = xr.Dataset(
             data_vars={
-                'trsl': (('sublink_id', 'time'), [df_data.s73.values, df_data.s83.values]),
+                'tl': (('sublink_id', 'time'), [df_data.s73.values, df_data.s83.values]),
                 'frequency': (('sublink_id'), [73.5, 83.5]),
             },
             coords=dict(
@@ -68,13 +68,19 @@ def tranform_fencl_2021_Eband_data(fn):
                 cml_id='cz_example_cml_1',
                 length=4.866,
                 sublink_id=(('sublink_id'), ['ab', 'ba']),
-                site_a_longitude=14.53,
-                site_b_longitude=14.53, # coordinates have been rounded for publication...
-                site_a_latitude=50.03,
-                site_b_latitude=50.03,
+                site_0_lon=14.53,
+                site_1_lon=14.53, # coordinates have been rounded for publication...
+                site_0_lat=50.03,
+                site_1_lat=50.03,
             ),
         )
-        return ds
+        
+    # add standard attributes
+    ds = add_cml_attributes(ds)
+        
+                
+    return ds
+      
 
     
 # 6 Eband CMLs from Czech Republic
@@ -84,9 +90,9 @@ download_fencl_2020_Eband_data = partial(
     url="https://zenodo.org/record/4090953/files/dataset.zip",
 )
 
-def transform_fencl_2020_Eband_data(fn):
+def transform_fencl_2020_Eband_data(local_path, fn):
     ds_list = []
-    with zipfile.ZipFile(fn) as zfile:
+    with zipfile.ZipFile(local_path + fn) as zfile:
         # read metadata
         df_metadata = pd.read_csv(
             zfile.open('raw/commercial_microwave_links_total_loss/metadata_table_commercial_microwave_links.csv'),
@@ -106,21 +112,23 @@ def transform_fencl_2020_Eband_data(fn):
                     parse_dates=True,
                     sep=';',
                 )
+                
                 ds_list.append(
                     xr.Dataset(
-                        data_vars={'trsl': (('time'), df_data.total_loss)},
+                        data_vars={'tl': (('time'), df_data.total_loss)},
                         coords=dict(
                             time=df_data.index.values,
                             cml_id=row.id_old,
                             length=row.length/1e3,
                             frequency=row[f'freq{ab.upper()}'],
-                            site_a_longitude=row.lonA,
-                            site_b_longitude=row.lonB,
-                            site_a_latitude=row.latA,
-                            site_b_latitude=row.latB,
+                            site_0_lon=row.lonA,
+                            site_1_lon=row.lonB,
+                            site_0_lat=row.latA,
+                            site_1_lat=row.latB,
                         ),
                     )
                 )
+
     return ds_list
 
 
@@ -196,23 +204,26 @@ def transform_overeem_2019_large_CML_data_Netherlands(fn, nrows=None):
         ds_list.append(
             xr.Dataset(
                 data_vars=dict(
-                    pmin=("time", df_sel.pmin.values), pmax=("time", df_sel.pmax.values)
+                    rsl_min=("time", df_sel.pmin.values), rsl_max=("time", df_sel.pmax.values)
                 ),
                 coords=dict(
                     time=df_sel.index.values,
                     cml_id=df_sel.id.values[0],
                     length=df_sel.pathlength.values[0],
                     frequency=df_sel.frequency.values[0],
-                    site_a_longitude=df_sel.xstart.values[0],
-                    site_b_longitude=df_sel.xend.values[0],
-                    site_a_latitude=df_sel.ystart.values[0],
-                    site_b_latitude=df_sel.yend.values[0],
+                    site_0_lon=df_sel.xstart.values[0],
+                    site_1_lon=df_sel.xend.values[0],
+                    site_0_lat=df_sel.ystart.values[0],
+                    site_1_lat=df_sel.yend.values[0],
                 ),
             )
         )
 
     # concat all individual xarray datasets
     ds2012 = xr.concat(ds_list, dim="cml_id")
+    
+    # add standard attributes
+    ds2012 = add_cml_attributes(ds2012)
 
     return ds2012
 
@@ -237,10 +248,10 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
     
     # Add metadata with naming convention as currently used in pycomlink example data file
     for col_name, ds_var_name in [
-        ('NearLatitude_DecDeg', 'site_a_latitude'),
-        ('NearLongitude_DecDeg', 'site_a_longitude'),
-        ('FarLatitude_DecDeg', 'site_b_latitude'),
-        ('FarLongitude_DecDeg', 'site_b_longitude'),
+        ('NearLatitude_DecDeg', 'site_0_lat'),
+        ('NearLongitude_DecDeg', 'site_0_lon'),
+        ('FarLatitude_DecDeg', 'site_1_lat'),
+        ('FarLongitude_DecDeg', 'site_1_lon'),
         ('Frequency_GHz', 'frequency'),
         ('Polarization', 'polarization'),
         ('Length_km', 'length'),
@@ -252,4 +263,218 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
         
     ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
     
+    # Change "sublink" to "sublink_id"
+    ds = ds.rename({"sublink": "sublink_id"})
+    
+    # add standard attributes
+    ds = add_cml_attributes(ds)
+    
     return ds
+
+
+def transform_German_CML_data(fn):
+    
+    ds = xr.open_dataset(fn)
+    
+    # rename according to new conventions
+    ds = ds.rename({
+        "site_a_latitude": "site_0_lat",
+        "site_a_longitude": "site_0_lon",
+        "site_b_latitude": "site_1_lat",
+        "site_b_longitude": "site_1_lon",
+        "channel_id": "sublink_id",
+    })
+    
+    # add standard attributes
+    ds = add_cml_attributes(ds)
+    
+    return ds
+
+
+def add_cml_attributes(ds):
+    
+    # dictionary of optional and required attributes for variables
+    # and coordinates according to OpenSense white paper
+    dict_attributes = {
+        "time": {
+            # "units": "s",    # defining units here interferes with encoding units of time
+            "long_name": "time_utc",
+            # "missing_value": "",   # defining units here interferes with encoding
+        },
+        "cml_id": {
+            "long_name": "commercial_microwave_link_identifier",
+        },
+        "sublink_id": {
+            "long_name": "sublink_identifier",
+        },
+        "site_0_lat": {
+            "units": "degrees_in_WGS84_projection",
+            "long_name": "site_0_latitude",
+        },
+        "site_0_lon": {
+            "units": "degrees_in_WGS84_projection",
+            "long_name": "site_0_longitude",
+        },      
+        "site_0_elev": {
+            "units": "meters_above_sea",
+            "long_name": "ground_elevation_above_sea_level",
+        },     
+        "site_0_alt": {
+            "units": "meters_above_sea",
+            "long_name": "antenna_altitude_above_sea_level",
+        }, 
+        "site_1_lat": {
+            "units": "degrees in WGS84 projection",
+            "long_name": "site_1_latitude",
+        },
+        "site_1_lon": {
+            "units": "degrees in WGS84 projection",
+            "long_name": "site_1_longitude",
+        },               
+        "site_1_elev": {
+            "units": "meters_above_sea",
+            "long_name": "ground_elevation_above_sea_level",
+        },     
+        "site_1_alt": {
+            "units": "meters_above_sea",
+            "long_name": "antenna_altitude_above_sea_level",
+        },    
+        "length": {
+            "units": "m",
+            "long_name": "distance_between_pair_of_antennas",
+        },                
+        "frequency": {
+            "units": "MHz",
+            "long_name": "sublink_frequency",
+        },
+        "polarization": {
+            "units": "no units",
+            "long_name": "sublink_polarization",
+            "missing_value": "",
+        },
+        "tsl": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "transmitted_signal_level",
+            "missing_value": "",
+        },             
+        "rsl": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "received_signal_level",
+            "missing_value": "",            
+        },
+        "tsl_max": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "maximum_transmitted_signal_level_over_time_window",
+            "missing_value": "",
+        },             
+        "tsl_min": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "minimum_transmitted_signal_level_over_time_window",
+            "missing_value": "",            
+        },             
+        "tsl_avg": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "averaged_transmitted_signal_level_over_time_window",
+            "missing_value": "",            
+        },           
+        "tsl_inst": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "instantaneous_transmitted_signal_level",
+            "missing_value": "",            
+        },
+        "rsl_max": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "maximum_received_signal_level_over_time_window",
+            "missing_value": "",
+        },             
+        "rsl_min": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "minimum_received_signal_level_over_time_window",
+            "missing_value": "",            
+        },             
+        "rsl_avg": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "averaged_received_signal_level_over_time_window",
+            "missing_value": "",            
+        },           
+        "rsl_inst": {
+            "units": "dBm",
+            "coordinates": "cml_id, sublink_id, time",
+            "long_name": "instantaneous_received_signal_level",
+            "missing_value": "",            
+        },           
+        "temperature_0": {
+            "units": "degrees_of_celsius",
+            "coordinates": "cml_id, time",
+            "long_name": "sensor_temperature_at_site_0",
+            "missing_value": "",            
+        },
+        "temperature_1": {
+            "units": "degrees_of_celsius",
+            "coordinates": "cml_id, time",            
+            "long_name": "sensor_temperature_at_site_1",
+            "missing_value": "",            
+        },
+    }
+    
+    # list of global attributes according to white paper
+    global_attr_vars = [
+        "title",
+        "file author(s)",
+        "institution",
+        "date",
+        "source",
+        "history",
+        "naming convention",
+        "license restrictions",
+        "reference",
+        "comment",
+    ]
+    
+    # extract list of variables present in dataset
+    ds_vars = list(ds.coords) + list(ds.data_vars)
+
+    # add attributes of variables to dataset
+    for v in ds_vars:
+        if v in dict_attributes.keys():
+            ds[v].attrs = dict_attributes[v]
+        
+    # add a placeholder for global attributes that are not given
+    for v in global_attr_vars:
+        if v not in ds.attrs.keys():            
+            ds.attrs[v] = "NA"
+            
+    # set encoding attributes
+    ds.time.encoding['units'] = "seconds since 1970-01-01 00:00:00"
+
+    return ds
+
+        
+def check_existence_of_required_vars(ds):
+        
+    required_vars = [
+        "time",
+        "cml_id",
+        "sublink_id",
+        "site_0_lat",
+        "site_0_lon",
+        "site_1_lat",
+        "site_1_lon",
+        "frequency",
+        "tsl",
+        "rsl",
+    ]  
+    ds_vars = list(ds.coords) + list(ds.data_vars)    
+
+    for required_var in required_vars:
+        if required_var not in ds_vars:
+            print("Warning: %s is required but not present."%required_var)
