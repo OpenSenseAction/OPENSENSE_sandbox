@@ -7,6 +7,7 @@ from functools import partial
 
 import pandas as pd
 import xarray as xr
+import numpy as np
 
 
 def download_data_file(url, local_path=".", local_file_name=None, print_output=False):
@@ -235,7 +236,7 @@ download_andersson_2022_OpenMRG = partial(
     url="https://zenodo.org/record/7107689/files/OpenMRG.zip",
 )
 
-def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
+def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, restructure_data = False):
     # For this ZIP file we cannot extract only the CML data since
     # the NetCDF with the CML data is quite large. This seems to
     # lead to crashes when reding directly from the ZIP file via Python.
@@ -246,30 +247,86 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to):
     df_metadata = pd.read_csv(os.path.join(path_to_extract_to, 'cml/cml_metadata.csv'), index_col=0)
     ds = xr.open_dataset(os.path.join(path_to_extract_to, 'cml/cml.nc'))
     
-    # Add metadata with naming convention as currently used in pycomlink example data file
-    for col_name, ds_var_name in [
-        ('NearLatitude_DecDeg', 'site_0_lat'),
-        ('NearLongitude_DecDeg', 'site_0_lon'),
-        ('FarLatitude_DecDeg', 'site_1_lat'),
-        ('FarLongitude_DecDeg', 'site_1_lon'),
-        ('Frequency_GHz', 'frequency'),
-        ('Polarization', 'polarization'),
-        ('Length_km', 'length'),
-    ]:
-        ds.coords[ds_var_name] = (
-            ('sublink'), 
-            [df_metadata[df_metadata.Sublink==sublink_id][col_name].values[0] for sublink_id in list(ds.sublink.values)]
-        )
+    
+
+    # resample to popular temporal resolution (1minute) and restructure into
+    # channels
+    if restructure_data == True:
+        time_start = ds.time[0].values
+        time_end = ds.time[-1].values
+        timeseries = pd.date_range(time_start, time_end, freq='1T')
         
-    ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+        # create dataset in working memory, we will read to this iteratively
+        ds_cml2chl = xr.Dataset(
+            data_vars= dict(
+                rsl=(['sublink_id', 'channel_id', 'time'], np.zeros([
+                    int(ds.sublink.size/2), 2, timeseries.size])*np.nan),
+                tsl=(['sublink_id', 'channel_id', 'time'], np.zeros([
+                    int(ds.sublink.size/2), 2, timeseries.size])*np.nan), 
+            ),
+            coords=dict(
+                sublink_id = (df_metadata.index.values % 10000)[::2], # name of the sublinks, corresponds to ds
+                channel_id = ['channel_1', 'channel_2'],
+                time = timeseries,
+        
+                length = ('sublink_id', df_metadata.Length_km[::2]),
+                site_0_lat = ('sublink_id', df_metadata.NearLatitude_DecDeg[::2]),
+                site_0_lon = ('sublink_id', df_metadata.NearLongitude_DecDeg[::2]),
+                site_1_lat = ('sublink_id', df_metadata.FarLatitude_DecDeg[::2]),
+                site_1_lon = ('sublink_id', df_metadata.FarLongitude_DecDeg[::2]),
+                
+                frequency = (('sublink_id', 'channel_id'), np.zeros([int(ds.sublink.size/2), 2])*np.nan),
+                polarization = (('sublink_id', 'channel_id'), (np.zeros([int(ds.sublink.size/2), 2])*np.nan).astype(str)),
+                
+            ),
+        )
+        # we populate where we have data
+        for cml in ds.sublink:
+            # metadata for inserting to ds_cml2chl
+            sublink_name = (cml.values + 1) // 2  # logic for getting the name (also index) of the link
+            sublink_channel = ((cml.values + 1) % 2) # channel index of link
+            sublink_channel = xr.where(sublink_channel == 0, 'channel_1', 'channel_2')
+            
+            # transform to dataframe (much faster resampling)
+            # link: https://stackoverflow.com/questions/64282393/how-can-i-speed-up-xarray-resample-much-slower-than-pandas-resample
+            ds_rsl = ds.sel(sublink = cml).rsl.to_dataframe().resample("1T").mean().to_xarray()
+            ds_tsl = ds.sel(sublink = cml).tsl.to_dataframe().resample("1T").mean().to_xarray()
+            
+            # store in ds_cml2chl
+            ds_cml2chl['rsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_rsl.rsl 
+            ds_cml2chl['tsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_tsl.tsl 
+        
+        ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+        
+        # add standard attributes
+        ds_cml2chl = add_cml_attributes(ds_cml2chl)   
+        
+        return ds_cml2chl
     
-    # Change "sublink" to "sublink_id"
-    ds = ds.rename({"sublink": "sublink_id"})
-    
-    # add standard attributes
-    ds = add_cml_attributes(ds)
-    
-    return ds
+    else:
+        # Add metadata with naming convention as currently used in pycomlink example data file
+        for col_name, ds_var_name in [
+            ('NearLatitude_DecDeg', 'site_0_lat'),
+            ('NearLongitude_DecDeg', 'site_0_lon'),
+            ('FarLatitude_DecDeg', 'site_1_lat'),
+            ('FarLongitude_DecDeg', 'site_1_lon'),
+            ('Frequency_GHz', 'frequency'),
+            ('Polarization', 'polarization'),
+            ('Length_km', 'length'),
+        ]:
+            ds.coords[ds_var_name] = (
+                ('sublink'), 
+                [df_metadata[df_metadata.Sublink==sublink_id][col_name].values[0] for sublink_id in list(ds.sublink.values)]
+            )
+            
+        ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+            
+        # add standard attributes
+        ds = add_cml_attributes(ds)        
+        
+        return ds
+
+
 
 
 def transform_German_CML_data(fn):
