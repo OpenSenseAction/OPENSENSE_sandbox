@@ -236,7 +236,11 @@ download_andersson_2022_OpenMRG = partial(
     url="https://zenodo.org/record/7107689/files/OpenMRG.zip",
 )
 
-def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, restructure_data = False):
+def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, 
+                                     time_start_end = ('2015-07-27T00', '2015-07-27T00'), # set to none to use all time
+                                     restructure_data = False, # changes nc structure so that links come in channel pairs
+                                     resample_1min = False, # also restructures data
+                                     ):
     # For this ZIP file we cannot extract only the CML data since
     # the NetCDF with the CML data is quite large. This seems to
     # lead to crashes when reding directly from the ZIP file via Python.
@@ -249,14 +253,24 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, restructure_data = 
     
     
 
-    # resample to popular temporal resolution (1minute) and restructure into
-    # channels
-    if restructure_data == True:
-        time_start = ds.time[0].values
-        time_end = ds.time[-1].values
-        timeseries = pd.date_range(time_start, time_end, freq='1T')
+    # restructure data: so that we have two channels per link. 
+    # resample data: True if you want 1 min data instad if 10 sec (resampling might take some time)
+    if restructure_data == True or resample_1min == True:
+        # get numpy datetime object for start and end time
+        if time_start_end is None:
+            time_start = ds.time[0].values
+            time_end = ds.time[-1].values
+        else:
+            time_start = ds.time.sel(time = time_start_end[0], method="nearest").values
+            time_end = ds.time.sel(time = time_start_end[1], method="nearest").values
         
-        # create dataset in working memory, we will read to this iteratively
+        # create array for timesteps we will work on
+        if resample_1min:
+            timeseries = pd.date_range(time_start, time_end, freq='1T')
+        else: 
+            timeseries = pd.date_range(time_start, time_end, freq='10S')
+            
+        # allocate dataset, we will read to this iteratively later
         ds_cml2chl = xr.Dataset(
             data_vars= dict(
                 rsl=(['sublink_id', 'channel_id', 'time'], np.zeros([
@@ -275,24 +289,40 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, restructure_data = 
                 site_1_lat = ('sublink_id', df_metadata.FarLatitude_DecDeg[::2]),
                 site_1_lon = ('sublink_id', df_metadata.FarLongitude_DecDeg[::2]),
                 
-                frequency = (('sublink_id', 'channel_id'), np.zeros([int(ds.sublink.size/2), 2])*np.nan),
-                polarization = (('sublink_id', 'channel_id'), (np.zeros([int(ds.sublink.size/2), 2])*np.nan).astype(str)),
+                frequency = (('sublink_id', 'channel_id'), df_metadata['Frequency_GHz'].values.reshape(-1, 2)),
+                polarization = (('sublink_id', 'channel_id'), df_metadata['Frequency_GHz'].values.reshape(-1, 2)),
                 
             ),
         )
-        # we populate where we have data
+                    
+        
+        # populate dataset link by link
         for cml in ds.sublink:
             # metadata for inserting to ds_cml2chl
             sublink_name = (cml.values + 1) // 2  # logic for getting the name (also index) of the link
             sublink_channel = ((cml.values + 1) % 2) # channel index of link
             sublink_channel = xr.where(sublink_channel == 0, 'channel_1', 'channel_2')
+
             
-            # transform to dataframe (much faster resampling)
+            # Below: Transform to dataframe (much faster resampling)
             # link: https://stackoverflow.com/questions/64282393/how-can-i-speed-up-xarray-resample-much-slower-than-pandas-resample
-            ds_rsl = ds.sel(sublink = cml).rsl.to_dataframe().resample("1T").mean().to_xarray()
-            ds_tsl = ds.sel(sublink = cml).tsl.to_dataframe().resample("1T").mean().to_xarray()
             
-            # store in ds_cml2chl
+            # 
+            if resample_1min:
+                ds_rsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).rsl.to_dataframe(
+                    ).resample("1T").mean().to_xarray()
+                ds_tsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).tsl.to_dataframe(
+                    ).resample("1T").mean().to_xarray()
+                
+             # resample neares probably not needed for this occation, but it ensures 
+             # that the CMLs has the same timesteps between each other and the 
+             # timeseries variable (needed in the raw file dataset)
+            else:
+                ds_rsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).rsl.to_dataframe(
+                    ).resample("10S").nearest().to_xarray()
+                ds_tsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).tsl.to_dataframe(
+                    ).resample("10S").nearest().to_xarray()
+                # store in ds_cml2chl
             ds_cml2chl['rsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_rsl.rsl 
             ds_cml2chl['tsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_tsl.tsl 
         
