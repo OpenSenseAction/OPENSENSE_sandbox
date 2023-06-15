@@ -236,12 +236,14 @@ download_andersson_2022_OpenMRG = partial(
     url="https://zenodo.org/record/7107689/files/OpenMRG.zip",
 )
 
-def transform_andersson_2022_OpenMRG(fn, 
-                                     path_to_extract_to, 
-                                     time_start_end = [None, None], # none uses all time
-                                     restructure_data = False, 
-                                     resample_1min = False, 
-                                     ):
+
+def transform_andersson_2022_OpenMRG(
+    fn,
+    path_to_extract_to,
+    time_start_end=[None, None],  # none uses all timesteps
+    restructure_data=False,
+    resample_1min=False,
+):    
     """
 
     Parameters
@@ -330,7 +332,7 @@ def transform_andersson_2022_OpenMRG(fn,
             ),
             coords=dict(
                 cml_id = (df_metadata.index.values % 10000)[::2], # name of the sublinks, corresponds to ds
-                sublink_id = ['channel_1', 'channel_2'],
+                sublink_id = ['sublink_1', 'sublink_2'],
                 time = timeseries,
         
                 length = ('cml_id', df_metadata.Length_km[::2]),
@@ -354,7 +356,7 @@ def transform_andersson_2022_OpenMRG(fn,
             cml_name = (cml.values + 1) // 2  # logic for getting link number
             sublink_channel = ((cml.values + 1) % 2) # channel index of link
             sublink_channel = xr.where(
-                sublink_channel == 0, 'channel_1', 'channel_2')
+                sublink_channel == 0, 'sublink_1', 'sublink_2')
 
             
             # Transform to dataframe (much faster resampling)
