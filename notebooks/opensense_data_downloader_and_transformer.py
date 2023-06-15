@@ -236,11 +236,37 @@ download_andersson_2022_OpenMRG = partial(
     url="https://zenodo.org/record/7107689/files/OpenMRG.zip",
 )
 
-def transform_andersson_2022_OpenMRG(fn, path_to_extract_to, 
-                                     time_start_end = ('2015-07-27T00', '2015-07-27T00'), # set to none to use all time
-                                     restructure_data = False, # changes nc structure so that links come in channel pairs
-                                     resample_1min = False, # also restructures data
+def transform_andersson_2022_OpenMRG(fn, 
+                                     path_to_extract_to, 
+                                     time_start_end = [None, None], # none uses all time
+                                     restructure_data = False, 
+                                     resample_1min = False, 
                                      ):
+    """
+
+    Parameters
+    ----------
+    fn : str
+        input file, data/andersson_2022_OpenMRG/OpenMRG.zip
+    path_to_extract_to : str
+        data/andersson_2022_OpenMRG
+    time_start_end : list
+        list (start, end) for instance ('2015-07-27T00', '2015-07-28T06'). If 
+        a entry in the list is None do not bound in that direction. 
+    restructure_data : bool
+        wether to return xarray on the form ['cml_id', 'sublink_id', 'time']
+    resample_1min : bool
+        resample data to 1min frequency. This is useful if you want to use long
+        timeseries and 1min data. Resampling outside this function might take 
+        more memory. 
+        
+    Returns
+    -------
+    xarray dataset
+        formatted OpenMRG dataset
+
+    """
+    
     # For this ZIP file we cannot extract only the CML data since
     # the NetCDF with the CML data is quite large. This seems to
     # lead to crashes when reding directly from the ZIP file via Python.
@@ -248,21 +274,45 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to,
         zfile.extractall(path_to_extract_to)
     
     # Read metadata and data
-    df_metadata = pd.read_csv(os.path.join(path_to_extract_to, 'cml/cml_metadata.csv'), index_col=0)
+    df_metadata = pd.read_csv(os.path.join(path_to_extract_to,
+                                           'cml/cml_metadata.csv'), 
+                                            index_col=0)
     ds = xr.open_dataset(os.path.join(path_to_extract_to, 'cml/cml.nc'))
     
     
+    # Add metadata with naming convention as currently used in pycomlink example data file
+    for col_name, ds_var_name in [
+        ('NearLatitude_DecDeg', 'site_0_lat'),
+        ('NearLongitude_DecDeg', 'site_0_lon'),
+        ('FarLatitude_DecDeg', 'site_1_lat'),
+        ('FarLongitude_DecDeg', 'site_1_lon'),
+        ('Frequency_GHz', 'frequency'),
+        ('Polarization', 'polarization'),
+        ('Length_km', 'length'),
+    ]:
+        ds.coords[ds_var_name] = (
+            ('sublink'), 
+            [df_metadata[df_metadata.Sublink==sublink_id][
+                col_name].values[0] for sublink_id in list(ds.sublink.values)]
+        )
+        
+    ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+        
+    # add standard attributes
+    ds = add_cml_attributes(ds)
 
-    # restructure data: so that we have two channels per link. 
-    # resample data: True if you want 1 min data instad if 10 sec (resampling might take some time)
     if restructure_data == True or resample_1min == True:
         # get numpy datetime object for start and end time
-        if time_start_end is None:
+        if time_start_end[0] is None:
             time_start = ds.time[0].values
+        else:
+            time_start = ds.time.sel(time = time_start_end[0], 
+                                     method="nearest").values
+        if time_start_end[1] is None:
             time_end = ds.time[-1].values
         else:
-            time_start = ds.time.sel(time = time_start_end[0], method="nearest").values
-            time_end = ds.time.sel(time = time_start_end[1], method="nearest").values
+            time_end = ds.time.sel(time = time_start_end[1], 
+                                   method="nearest").values
         
         # create array for timesteps we will work on
         if resample_1min:
@@ -273,24 +323,26 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to,
         # allocate dataset, we will read to this iteratively later
         ds_cml2chl = xr.Dataset(
             data_vars= dict(
-                rsl=(['sublink_id', 'channel_id', 'time'], np.zeros([
+                rsl=(['cml_id', 'sublink_id', 'time'], np.zeros([
                     int(ds.sublink.size/2), 2, timeseries.size])*np.nan),
-                tsl=(['sublink_id', 'channel_id', 'time'], np.zeros([
+                tsl=(['cml_id', 'sublink_id', 'time'], np.zeros([
                     int(ds.sublink.size/2), 2, timeseries.size])*np.nan), 
             ),
             coords=dict(
-                sublink_id = (df_metadata.index.values % 10000)[::2], # name of the sublinks, corresponds to ds
-                channel_id = ['channel_1', 'channel_2'],
+                cml_id = (df_metadata.index.values % 10000)[::2], # name of the sublinks, corresponds to ds
+                sublink_id = ['channel_1', 'channel_2'],
                 time = timeseries,
         
-                length = ('sublink_id', df_metadata.Length_km[::2]),
-                site_0_lat = ('sublink_id', df_metadata.NearLatitude_DecDeg[::2]),
-                site_0_lon = ('sublink_id', df_metadata.NearLongitude_DecDeg[::2]),
-                site_1_lat = ('sublink_id', df_metadata.FarLatitude_DecDeg[::2]),
-                site_1_lon = ('sublink_id', df_metadata.FarLongitude_DecDeg[::2]),
+                length = ('cml_id', df_metadata.Length_km[::2]),
+                site_0_lat = ('cml_id', df_metadata.NearLatitude_DecDeg[::2]),
+                site_0_lon = ('cml_id', df_metadata.NearLongitude_DecDeg[::2]),
+                site_1_lat = ('cml_id', df_metadata.FarLatitude_DecDeg[::2]),
+                site_1_lon = ('cml_id', df_metadata.FarLongitude_DecDeg[::2]),
                 
-                frequency = (('sublink_id', 'channel_id'), df_metadata['Frequency_GHz'].values.reshape(-1, 2)),
-                polarization = (('sublink_id', 'channel_id'), df_metadata['Frequency_GHz'].values.reshape(-1, 2)),
+                frequency = (('cml_id', 'sublink_id'), df_metadata[
+                    'Frequency_GHz'].values.reshape(-1, 2)),
+                polarization = (('cml_id', 'sublink_id'), df_metadata[
+                    'Frequency_GHz'].values.reshape(-1, 2)),
                 
             ),
         )
@@ -299,62 +351,43 @@ def transform_andersson_2022_OpenMRG(fn, path_to_extract_to,
         # populate dataset link by link
         for cml in ds.sublink:
             # metadata for inserting to ds_cml2chl
-            sublink_name = (cml.values + 1) // 2  # logic for getting the name (also index) of the link
+            cml_name = (cml.values + 1) // 2  # logic for getting link number
             sublink_channel = ((cml.values + 1) % 2) # channel index of link
-            sublink_channel = xr.where(sublink_channel == 0, 'channel_1', 'channel_2')
+            sublink_channel = xr.where(
+                sublink_channel == 0, 'channel_1', 'channel_2')
 
             
-            # Below: Transform to dataframe (much faster resampling)
+            # Transform to dataframe (much faster resampling)
             # link: https://stackoverflow.com/questions/64282393/how-can-i-speed-up-xarray-resample-much-slower-than-pandas-resample
-            
-            # 
-            if resample_1min:
-                ds_rsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).rsl.to_dataframe(
-                    ).resample("1T").mean().to_xarray()
-                ds_tsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).tsl.to_dataframe(
-                    ).resample("1T").mean().to_xarray()
+
+            if resample_1min:                
+                ds_rsl = ds.sel(sublink = cml, time = slice(
+                    time_start, time_end)).rsl.to_dataframe().resample(
+                        "1T").mean(numeric_only=True).to_xarray().rsl # numeric_only: skip non-numeric
+                ds_tsl = ds.sel(sublink = cml, time = slice(
+                    time_start, time_end)).tsl.to_dataframe().resample(
+                        "1T").mean(numeric_only=True).to_xarray().tsl
                 
-             # resample neares probably not needed for this occation, but it ensures 
-             # that the CMLs has the same timesteps between each other and the 
-             # timeseries variable (needed in the raw file dataset)
             else:
-                ds_rsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).rsl.to_dataframe(
-                    ).resample("10S").nearest().to_xarray()
-                ds_tsl = ds.sel(sublink = cml, time = slice(time_start, time_end)).tsl.to_dataframe(
-                    ).resample("10S").nearest().to_xarray()
-                # store in ds_cml2chl
-            ds_cml2chl['rsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_rsl.rsl 
-            ds_cml2chl['tsl'].loc[dict(time=ds_rsl.time, sublink_id=sublink_name, channel_id = sublink_channel)] = ds_tsl.tsl 
+                ds_rsl = ds.sel(sublink = cml, time = slice(
+                    time_start, time_end)).rsl
+                ds_tsl = ds.sel(sublink = cml, time = slice(
+                    time_start, time_end)).tsl
+                
+            ds_cml2chl['rsl'].loc[dict(time=ds_rsl.time, cml_id=cml_name, 
+                                       sublink_id = sublink_channel)] = ds_rsl 
+            ds_cml2chl['tsl'].loc[dict(time=ds_rsl.time, cml_id=cml_name, 
+                                       sublink_id = sublink_channel)] = ds_tsl 
         
         ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
         
         # add standard attributes
-        ds_cml2chl = add_cml_attributes(ds_cml2chl)   
+        ds_cml2chl = add_cml_attributes(ds_cml2chl)
         
         return ds_cml2chl
     
     else:
-        # Add metadata with naming convention as currently used in pycomlink example data file
-        for col_name, ds_var_name in [
-            ('NearLatitude_DecDeg', 'site_0_lat'),
-            ('NearLongitude_DecDeg', 'site_0_lon'),
-            ('FarLatitude_DecDeg', 'site_1_lat'),
-            ('FarLongitude_DecDeg', 'site_1_lon'),
-            ('Frequency_GHz', 'frequency'),
-            ('Polarization', 'polarization'),
-            ('Length_km', 'length'),
-        ]:
-            ds.coords[ds_var_name] = (
-                ('sublink'), 
-                [df_metadata[df_metadata.Sublink==sublink_id][col_name].values[0] for sublink_id in list(ds.sublink.values)]
-            )
-            
-        ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
-            
-        # add standard attributes
-        ds = add_cml_attributes(ds)        
-        
-        return ds
+        return ds.sel(time = slice(time_start_end[0],  time_start_end[1]))
 
 
 
