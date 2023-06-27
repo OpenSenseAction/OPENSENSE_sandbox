@@ -17,12 +17,12 @@ To run the code locally and/or to contribute to this repository, you need to set
 
 First, you need to have `conda` installed. If this is you first installation of `conda` we recommend to start with the `mambaforge` installer which is available for Windows, Linux and Mac [here](https://github.com/conda-forge/miniforge#mambaforge). Note that "mamba" is just a faster implementation of "conda", and "forge" refers to the fact that you will use the community packages from the [conda-forge "channel"](https://conda-forge.org/), which has a  larger choice of scientific Python and R packages than the default conda "channel".
 
-With `conda` set up, follow these steps:
+With `conda` or `mamba` set up, follow these steps:
 1. Clone this repo and its git submodules to your machine. Or, if you plan to contribute, first create a fork of it and clone from this fork (you have to adjust the URL below). Note that `git clone` will create a new directory OPENSENSE_sandbox in the directory that you are currently in and place the repo content there.
    ```
    git clone --recursive https://github.com/OpenSenseAction/OPENSENSE_sandbox.git
    ```
-2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` is available. Please refer to the `conda` docs to find out how to achieve that.
+2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
    ```
    wget https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment/blob/main/environment.yml
    mamba env create environment.yml
