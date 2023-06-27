@@ -33,7 +33,7 @@ With `conda` set up, follow these steps:
    ```
 4. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
    ```
-   conda install jupyter-lab
+   mamba install -c conda-forge jupyterlab
    ```
 5. Run `jupyter-lab`. It will open in your default browser.
    ```
