@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox%26urlpath=lab/tree/OPENSENSE_sandbox/notebooks/index.ipynb&branch=main)  :point_left: Click here to run the examples online.
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox%26urlpath=lab/tree/OPENSENSE_sandbox/notebooks/index.ipynb&branch=main)  :point_left: Click here to run the examples online. (please retry if the build process does not finish after some minutes)
 
 <img src="https://user-images.githubusercontent.com/102827/174779884-a2fb0971-4850-4ad6-93eb-2c53b922b408.svg" alt="drawing" width="300"/>
 
@@ -17,15 +17,15 @@ To run the code locally and/or to contribute to this repository, you need to set
 
 First, you need to have `conda` installed. If this is you first installation of `conda` we recommend to start with the `mambaforge` installer which is available for Windows, Linux and Mac [here](https://github.com/conda-forge/miniforge#mambaforge). Note that "mamba" is just a faster implementation of "conda", and "forge" refers to the fact that you will use the community packages from the [conda-forge "channel"](https://conda-forge.org/), which has a  larger choice of scientific Python and R packages than the default conda "channel".
 
-With `conda` set up, follow these steps:
+With `conda` or `mamba` set up, follow these steps:
 1. Clone this repo and its git submodules to your machine. Or, if you plan to contribute, first create a fork of it and clone from this fork (you have to adjust the URL below). Note that `git clone` will create a new directory OPENSENSE_sandbox in the directory that you are currently in and place the repo content there.
    ```
    git clone --recursive https://github.com/OpenSenseAction/OPENSENSE_sandbox.git
    ```
-2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` is available. Please refer to the `conda` docs to find out how to achieve that.
+2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
    ```
    wget https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment/blob/main/environment.yml
-   conda env create environment.yml
+   mamba env create environment.yml
    ```
 3. Activate the env.
    ```
@@ -33,7 +33,7 @@ With `conda` set up, follow these steps:
    ```
 4. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
    ```
-   conda install jupyter-lab
+   mamba install -c conda-forge jupyterlab
    ```
 5. Run `jupyter-lab`. It will open in your default browser.
    ```
