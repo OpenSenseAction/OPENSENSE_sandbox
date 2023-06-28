@@ -7,3 +7,17 @@
 .idea/vcs.xml
 .idea/misc.xml
 .idea/workspace.xml
+notebooks/data/andersson_2022_OpenMRG/gauges/city/CityGauges-2015JJA.csv
+notebooks/data/andersson_2022_OpenMRG/gauges/city/CityGauges-metadata.csv
+notebooks/data/andersson_2022_OpenMRG/gauges/smhi/GbgA-71420-2015JJA.csv
+notebooks/data/andersson_2022_OpenMRG/gauges/smhi/GbgA-71420-metadata.csv
+notebooks/data/andersson_2022_OpenMRG/radar/example_read_radar_nc.py
+notebooks/data/andersson_2022_OpenMRG/radar/radar.nc
+notebooks/data/andersson_2022_OpenMRG/readme.txt
+notebooks/data/andersson_2022_OpenMRG/OpenMRG.zip
+notebooks/data/andersson_2022_OpenMRG/cml/example_read_cml.nc.py
+notebooks/data/andersson_2022_OpenMRG/Torslanda-event-2015-07-28/Torslanda-radar-animation.mp4
+notebooks/data/andersson_2022_OpenMRG/Torslanda-event-2015-07-28/Torslanda-interactive-time-series.zip
+notebooks/data/andersson_2022_OpenMRG/cml/cml_metadata.csv
+notebooks/data/andersson_2022_OpenMRG/cml/cml.nc
+notebooks/__pycache__/opensense_data_downloader_and_transformer.cpython-310.pyc
