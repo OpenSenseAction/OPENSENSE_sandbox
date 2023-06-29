@@ -345,7 +345,7 @@ def transform_andersson_2022_OpenMRG(
                 frequency = (('cml_id', 'sublink_id'), df_metadata[
                     'Frequency_GHz'].values.reshape(-1, 2)),
                 polarization = (('cml_id', 'sublink_id'), df_metadata[
-                    'Frequency_GHz'].values.reshape(-1, 2)),
+                    'Polarization'].values.reshape(-1, 2)),
                 
             ),
         )
