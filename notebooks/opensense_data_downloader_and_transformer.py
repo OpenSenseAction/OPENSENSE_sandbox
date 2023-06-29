@@ -331,7 +331,8 @@ def transform_andersson_2022_OpenMRG(
                     int(ds.sublink.size/2), 2, timeseries.size])*np.nan), 
             ),
             coords=dict(
-                cml_id = (df_metadata.index.values % 10000)[::2], # name of the sublinks, corresponds to ds
+                cml_id = np.arange(df_metadata.Sublink.values.size/2),
+                sublink = (('cml_id', 'sublink_id'), df_metadata.Sublink.values.reshape(-1, 2)), 
                 sublink_id = ['sublink_1', 'sublink_2'],
                 time = timeseries,
         
@@ -353,12 +354,12 @@ def transform_andersson_2022_OpenMRG(
         # populate dataset link by link
         for cml in ds.sublink:
             # metadata for inserting to ds_cml2chl
-            cml_name = (cml.values + 1) // 2  # logic for getting link number
-            sublink_channel = ((cml.values + 1) % 2) # channel index of link
-            sublink_channel = xr.where(
-                sublink_channel == 0, 'sublink_1', 'sublink_2')
+            cml_name = np.where(df_metadata.Sublink.values == cml.values)[0][0] /2, # name is just index for now            
+            cml_name = int(cml_name[0])
+                        
+            sublink_channel = df_metadata.Direction.values[cml_name]
+            sublink_channel = xr.where(sublink_channel == 'A', 'sublink_1', 'sublink_2')
 
-            
             # Transform to dataframe (much faster resampling)
             # link: https://stackoverflow.com/questions/64282393/how-can-i-speed-up-xarray-resample-much-slower-than-pandas-resample
 
