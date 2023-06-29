@@ -378,9 +378,9 @@ def transform_andersson_2022_OpenMRG(
                     time_start, time_end)).tsl
                 
             ds_cml2chl['rsl'].loc[dict(time=ds_rsl.time, cml_id=cml_name, 
-                                       sublink_id = sublink_channel)] = ds_rsl 
+                                       sublink_id = sublink_channel)] = ds_rsl.values 
             ds_cml2chl['tsl'].loc[dict(time=ds_rsl.time, cml_id=cml_name, 
-                                       sublink_id = sublink_channel)] = ds_tsl 
+                                       sublink_id = sublink_channel)] = ds_tsl.values 
         
         ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
         
