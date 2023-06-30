@@ -237,7 +237,95 @@ download_andersson_2022_OpenMRG = partial(
 )
 
 
+
 def transform_andersson_2022_OpenMRG(
+    fn,
+    path_to_extract_to,
+    time_start_end=[None, None],  # none uses all timesteps
+    restructure_data=False,
+):    
+    """
+
+    Parameters
+    ----------
+    fn : str
+        input file, data/andersson_2022_OpenMRG/OpenMRG.zip
+    path_to_extract_to : str
+        data/andersson_2022_OpenMRG
+    time_start_end : list
+        list (start, end) for instance ('2015-07-27T00', '2015-07-28T06'). If 
+        a entry in the list is None do not bound in that direction. 
+    restructure_data : bool
+        wether to return xarray on the form ['cml_id', 'sublink_id', 'time']
+        
+    Returns
+    -------
+    xarray dataset
+        formatted OpenMRG dataset
+
+    """
+    
+    # For this ZIP file we cannot extract only the CML data since
+    # the NetCDF with the CML data is quite large. This seems to
+    # lead to crashes when reding directly from the ZIP file via Python.
+    with zipfile.ZipFile(fn) as zfile:
+        zfile.extractall(path_to_extract_to)
+    
+    # Read metadata and data
+    df_metadata = pd.read_csv(os.path.join(path_to_extract_to,
+                                           'cml/cml_metadata.csv'), 
+                                            index_col=0)
+    ds = xr.open_dataset(os.path.join(path_to_extract_to, 'cml/cml.nc'))
+    
+    
+    # Add metadata with naming convention as currently used in pycomlink example data file
+    for col_name, ds_var_name in [
+        ('NearLatitude_DecDeg', 'site_0_lat'),
+        ('NearLongitude_DecDeg', 'site_0_lon'),
+        ('FarLatitude_DecDeg', 'site_1_lat'),
+        ('FarLongitude_DecDeg', 'site_1_lon'),
+        ('Frequency_GHz', 'frequency'),
+        ('Polarization', 'polarization'),
+        ('Length_km', 'length'),
+    ]:
+        ds.coords[ds_var_name] = (
+            ('sublink'), 
+            [df_metadata[df_metadata.Sublink==sublink_id][
+                col_name].values[0] for sublink_id in list(ds.sublink.values)]
+        )
+        
+    ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
+        
+    # add standard attributes
+    ds = add_cml_attributes(ds)
+    
+    ds = ds.sel(time = slice(time_start_end[0],  time_start_end[1]))
+    if restructure_data == True:
+        # create pandas multiindex for splitting into [cml_id, sublink_id, time]
+        df_metadata = df_metadata.reset_index()
+        df_metadata=df_metadata.set_index(['Direction','Link']).sort_values([('Sublink')], ascending=True)
+        ds_multindex = ds.assign_coords({'sublink':df_metadata.index})
+        ds_multindex=ds_multindex.unstack()
+        ds_multindex=ds_multindex.rename({'Direction':'sublink_id','Link':'cml_id'})
+        ds_multindex['polarization'] = xr.where(ds_multindex['polarization'] == 'Vertical', 'v', 'h')
+        ds_multindex['sublink_id'] = xr.where(ds_multindex['sublink_id'] == 'A', 'sublink_1', 'sublink_2')
+        
+        # remove missing value convention, fallback to default xarray behaviour
+        ds_multindex.tsl.attrs.pop('missing_value')
+        ds_multindex.rsl.attrs.pop('missing_value')
+        
+        # set coordinates that reflect the same properties for beth sublinks
+        for ds_var_name in ['site_0_lat', 'site_1_lat', 'site_0_lon', 
+                            'site_1_lon', 'length']:
+            ds_multindex = ds_multindex.assign_coords({ds_var_name: (
+                'cml_id', ds_multindex.isel(sublink_id = 0)[ds_var_name].values) })
+        
+        return ds_multindex
+    
+    else:
+        return ds
+
+def transform_andersson_2022_OpenMRG_linkbylink(
     fn,
     path_to_extract_to,
     time_start_end=[None, None],  # none uses all timesteps
@@ -331,7 +419,7 @@ def transform_andersson_2022_OpenMRG(
                     int(ds.sublink.size/2), 2, timeseries.size])*np.nan), 
             ),
             coords=dict(
-                cml_id = np.arange(df_metadata.Sublink.values.size/2),
+                cml_id = df_metadata.index.values[::2], # link name is every second row
                 sublink = (('cml_id', 'sublink_id'), df_metadata.Sublink.values.reshape(-1, 2)), 
                 sublink_id = ['sublink_1', 'sublink_2'],
                 time = timeseries,
@@ -354,12 +442,14 @@ def transform_andersson_2022_OpenMRG(
         # populate dataset link by link
         for cml in ds.sublink:
             # metadata for inserting to ds_cml2chl
-            cml_name = np.where(df_metadata.Sublink.values == cml.values)[0][0] /2, # name is just index for now            
-            cml_name = int(cml_name[0])
-                        
-            sublink_channel = df_metadata.Direction.values[cml_name]
-            sublink_channel = xr.where(sublink_channel == 'A', 'sublink_1', 'sublink_2')
-
+            cml_name =df_metadata.loc[df_metadata['Sublink'] == cml.values].index.values[0]
+            sublink_channel =df_metadata.loc[df_metadata['Sublink'] == cml.values].Direction.values
+            sublink_channel = xr.where(sublink_channel == 'A', 'sublink_1', 'sublink_2')[0]
+            
+            if cml_name == 1:
+                print(cml_name)
+                print(sublink_channel)
+            
             # Transform to dataframe (much faster resampling)
             # link: https://stackoverflow.com/questions/64282393/how-can-i-speed-up-xarray-resample-much-slower-than-pandas-resample
 
