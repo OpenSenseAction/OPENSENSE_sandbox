@@ -1,15 +1,22 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox%26urlpath=lab/tree/OPENSENSE_sandbox/notebooks/index.ipynb&branch=main)  :point_left: Click here to run the examples online. (please retry if the build process does not finish after some minutes)
-
 <img src="https://user-images.githubusercontent.com/102827/174779884-a2fb0971-4850-4ad6-93eb-2c53b922b408.svg" alt="drawing" width="300"/>
 
-# OPENSENSE software sandbox
-A collection of software packages for processing data from opportunistic rainfall sensors, developed within the COST Action [OPENSENSE](https://opensenseaction.eu/)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/OpenSenseAction/OPENSENSE_sandbox_environment/main?urlpath=git-pull?repo=https://github.com/OpenSenseAction/OPENSENSE_sandbox%26urlpath=lab/tree/OPENSENSE_sandbox/notebooks/index.ipynb&branch=main)  :point_left: Click here to run the examples online. Please retry if the build process does not finish after some minutes.
 
-This is **currently WIP** and just a showcase of how existing codebases and existing open datasets can be combined in a reproducible environment and run online via mybinder.
+One of the examples will walk you through a full CML processing from raw data provided by the [OpenMRG dataset](https://doi.org/10.5194/essd-14-5411-2022) to a rainfall map animation like this one:
+
+<img src="OPENSENSE_sandbox_OpenMRG_usecase_animation.gif" alt="drawing" width="700"/>
+
+
+# OPENSENSE software sandbox
+The OPENSENSE software sandbox is a collection of software packages for processing data from opportunistic rainfall sensors, developed within the COST Action [OPENSENSE](https://opensenseaction.eu/).
+
+The purpose of this repo is to showcase existing codebases and existing open datasets in one reproducible environment that can be run online via mybinder.
+
+Not all notebooks are in a final state, but the OpenMRG usecase and data exploration notebooks are nicely prepared to give new users a quick overview of code and data that is available.
 
 ## Run code online
 
-Even though this repo is WIP, feel free to try out the preliminary notebooks by clicking on the button "lauch binder" above. Note that it can take some minutes to build the online environment in case mybinder has no cached version of it.
+This repository is inteded to be run online  via the "launch binder" button above. Note that it can take some minutes to spin up the online environment. In some cases it might not start at all due to limited resources of the binder service. In that case, just try again some minutes later.
 
 ## Run environment locally
 
@@ -22,24 +29,32 @@ With `conda` or `mamba` set up, follow these steps:
    ```
    git clone --recursive https://github.com/OpenSenseAction/OPENSENSE_sandbox.git
    ```
-2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
+2. Stay in the directory of step 1, or change to it if required. Then download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) via `wget` like this
+    ```
+   wget https://raw.githubusercontent.com/OpenSenseAction/OPENSENSE_sandbox_environment/main/environment.yml
+    ```
+    or via `curl`
    ```
-   wget https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment/blob/main/environment.yml
+   curl -O https://raw.githubusercontent.com/OpenSenseAction/OPENSENSE_sandbox_environment/main/environment.yml
+   ```
+   If neither `wget` nor `curl` are available, you can also download the environment file via the browser, but make sure to save it in the directory to which you cloned the sandbox repo in step 1.
+3. Create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
+   ```
    mamba env create environment.yml
    ```
-3. Activate the env.
+4. Activate the env.
    ```
    conda activate opensense_sandbox
    ```
-4. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
+5. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
    ```
    mamba install -c conda-forge jupyterlab
    ```
-5. Run `jupyter-lab`. It will open in your default browser.
+6. Run `jupyter-lab`. It will open in your default browser.
    ```
    jupyter-lab
    ```
-6. Go to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
+7. Go to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
 
 ## Contributing
 
