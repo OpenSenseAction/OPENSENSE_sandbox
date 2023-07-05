@@ -22,24 +22,32 @@ With `conda` or `mamba` set up, follow these steps:
    ```
    git clone --recursive https://github.com/OpenSenseAction/OPENSENSE_sandbox.git
    ```
-2. Go to this directory, download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) and create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
+2. Stay in the directory of step 1, or change to it if required. Then download the `environment.yml` file from the [seperated environment repository](https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment) via `wget` like this
+    ```
+   wget https://raw.githubusercontent.com/OpenSenseAction/OPENSENSE_sandbox_environment/main/environment.yml
+    ```
+    or via `curl`
    ```
-   wget https://github.com/OpenSenseAction/OPENSENSE_sandbox_environment/blob/main/environment.yml
+   curl -O https://raw.githubusercontent.com/OpenSenseAction/OPENSENSE_sandbox_environment/main/environment.yml
+   ```
+   If neither `wget` nor `curl` are available, you can also download the environment file via the browser, but make sure to save it in the directory to which you cloned the sandbox repo in step 1.
+3. Create the `conda` environment. Note that you have to be in a terminal/shell where `conda` or `mamba` is available. Please refer to the `conda` docs to find out how to achieve that.
+   ```
    mamba env create environment.yml
    ```
-3. Activate the env.
+4. Activate the env.
    ```
    conda activate opensense_sandbox
    ```
-4. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
+5. Install `jupyter-lab` in addition. It is not in then `environment.yml` because mybinder installs it by default.
    ```
    mamba install -c conda-forge jupyterlab
    ```
-5. Run `jupyter-lab`. It will open in your default browser.
+6. Run `jupyter-lab`. It will open in your default browser.
    ```
    jupyter-lab
    ```
-6. Go to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
+7. Go to the index notebook in `notebooks/index.ipynb` and run the cell with the init script, using the line of code for local installation which is commented out by default. This will clone the code of the submodules, add them to the conda env and install the R packages.
 
 ## Contributing
 
