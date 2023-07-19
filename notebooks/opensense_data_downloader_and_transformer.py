@@ -515,7 +515,7 @@ def add_cml_attributes(ds):
         "time": {
             # "units": "s",    # defining units here interferes with encoding units of time
             "long_name": "time_utc",
-            #"missing_value": "",   # defining units here interferes with encoding
+            #"_FillValue": np.nan,   # defining units here interferes with encoding
         },
         "cml_id": {
             "long_name": "commercial_microwave_link_identifier",
@@ -566,79 +566,66 @@ def add_cml_attributes(ds):
         "polarization": {
             "units": "no units",
             "long_name": "sublink_polarization",
-            #"missing_value": "",
         },
         "tsl": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "transmitted_signal_level",
-            #"missing_value": "",
         },             
         "rsl": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "received_signal_level",
-            #"missing_value": "",            
         },
         "tsl_max": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "maximum_transmitted_signal_level_over_time_window",
-            #"missing_value": "",
         },             
         "tsl_min": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "minimum_transmitted_signal_level_over_time_window",
-            #"missing_value": "",            
         },             
         "tsl_avg": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "averaged_transmitted_signal_level_over_time_window",
-            #"missing_value": "",            
         },           
         "tsl_inst": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "instantaneous_transmitted_signal_level",
-            #"missing_value": "",            
         },
         "rsl_max": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "maximum_received_signal_level_over_time_window",
-            #"missing_value": "",
         },             
         "rsl_min": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "minimum_received_signal_level_over_time_window",
-            #"missing_value": "",            
         },             
         "rsl_avg": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "averaged_received_signal_level_over_time_window",
-            #"missing_value": "",            
         },           
         "rsl_inst": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "instantaneous_received_signal_level",
-            #"missing_value": "",            
         },           
         "temperature_0": {
             "units": "degrees_of_celsius",
             "coordinates": "cml_id, time",
             "long_name": "sensor_temperature_at_site_0",
-            #"missing_value": "",            
         },
         "temperature_1": {
             "units": "degrees_of_celsius",
             "coordinates": "cml_id, time",            
             "long_name": "sensor_temperature_at_site_1",
-            #"missing_value": "",            
         },
     }
     
