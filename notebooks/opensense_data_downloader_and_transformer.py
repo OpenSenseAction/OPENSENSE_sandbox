@@ -293,12 +293,7 @@ def transform_andersson_2022_OpenMRG(
             [df_metadata[df_metadata.Sublink==sublink_id][
                 col_name].values[0] for sublink_id in list(ds.sublink.values)]
         )
-        
-    ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
-        
-    # add standard attributes
-    ds = add_cml_attributes(ds)
-    
+            
     ds = ds.sel(time = slice(time_start_end[0],  time_start_end[1]))
     if restructure_data == True:
         # create pandas multiindex for splitting into [cml_id, sublink_id, time]
@@ -310,19 +305,27 @@ def transform_andersson_2022_OpenMRG(
         ds_multindex['polarization'] = xr.where(ds_multindex['polarization'] == 'Vertical', 'v', 'h')
         ds_multindex['sublink_id'] = xr.where(ds_multindex['sublink_id'] == 'A', 'sublink_1', 'sublink_2')
         
-        # remove missing value convention, fallback to default xarray behaviour
-        ds_multindex.tsl.attrs.pop('missing_value')
-        ds_multindex.rsl.attrs.pop('missing_value')
-        
-        # set coordinates that reflect the same properties for beth sublinks
+        # set coordinates that reflect the same properties for both sublinks
         for ds_var_name in ['site_0_lat', 'site_1_lat', 'site_0_lon', 
                             'site_1_lon', 'length']:
             ds_multindex = ds_multindex.assign_coords({ds_var_name: (
                 'cml_id', ds_multindex.isel(sublink_id = 0)[ds_var_name].values) })
         
+        ds_multindex.attrs['comment'] += "\n\nTransformed dataset: \n" \
+            "In order to meet the Opensense data format conventions the " \
+            "structure of the dataset was transformed using the code in " \
+            "opensense_data_downloader_and_transformer.py. This was a joint effort by " \
+            "Maximilian Graf, Erlend Øydvin, Nico Blettner and Christian Chwala."
+        ds_multindex['frequency'] = ds_multindex.frequency*1000 # to MHz
+        ds_multindex['length'] = ds_multindex.length*1000 # to meter
+
+        ds_multindex = add_cml_attributes(ds_multindex) # add all attributes afer restructure
+        
         return ds_multindex
     
     else:
+        ds = add_cml_attributes(ds)
+        ds.attrs['comment'] += '\nMetadata added with preliminary code from opensense_data_downloader.py'
         return ds
 
 def transform_andersson_2022_OpenMRG_linkbylink(
@@ -512,7 +515,7 @@ def add_cml_attributes(ds):
         "time": {
             # "units": "s",    # defining units here interferes with encoding units of time
             "long_name": "time_utc",
-            # "missing_value": "",   # defining units here interferes with encoding
+            #"missing_value": "",   # defining units here interferes with encoding
         },
         "cml_id": {
             "long_name": "commercial_microwave_link_identifier",
@@ -563,79 +566,79 @@ def add_cml_attributes(ds):
         "polarization": {
             "units": "no units",
             "long_name": "sublink_polarization",
-            "missing_value": "",
+            #"missing_value": "",
         },
         "tsl": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "transmitted_signal_level",
-            "missing_value": "",
+            #"missing_value": "",
         },             
         "rsl": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "received_signal_level",
-            "missing_value": "",            
+            #"missing_value": "",            
         },
         "tsl_max": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "maximum_transmitted_signal_level_over_time_window",
-            "missing_value": "",
+            #"missing_value": "",
         },             
         "tsl_min": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "minimum_transmitted_signal_level_over_time_window",
-            "missing_value": "",            
+            #"missing_value": "",            
         },             
         "tsl_avg": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "averaged_transmitted_signal_level_over_time_window",
-            "missing_value": "",            
+            #"missing_value": "",            
         },           
         "tsl_inst": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "instantaneous_transmitted_signal_level",
-            "missing_value": "",            
+            #"missing_value": "",            
         },
         "rsl_max": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "maximum_received_signal_level_over_time_window",
-            "missing_value": "",
+            #"missing_value": "",
         },             
         "rsl_min": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "minimum_received_signal_level_over_time_window",
-            "missing_value": "",            
+            #"missing_value": "",            
         },             
         "rsl_avg": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "averaged_received_signal_level_over_time_window",
-            "missing_value": "",            
+            #"missing_value": "",            
         },           
         "rsl_inst": {
             "units": "dBm",
             "coordinates": "cml_id, sublink_id, time",
             "long_name": "instantaneous_received_signal_level",
-            "missing_value": "",            
+            #"missing_value": "",            
         },           
         "temperature_0": {
             "units": "degrees_of_celsius",
             "coordinates": "cml_id, time",
             "long_name": "sensor_temperature_at_site_0",
-            "missing_value": "",            
+            #"missing_value": "",            
         },
         "temperature_1": {
             "units": "degrees_of_celsius",
             "coordinates": "cml_id, time",            
             "long_name": "sensor_temperature_at_site_1",
-            "missing_value": "",            
+            #"missing_value": "",            
         },
     }
     
