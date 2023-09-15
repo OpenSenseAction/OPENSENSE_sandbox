@@ -34,3 +34,15 @@ notebooks/data/andersson_2022_Ods_resG/readme.txt
 notebooks/data/andersson_2022_Ods_resG/Torslanda-event-2015-07-28/Torslanda-interactive-time-series.zip
 notebooks/data/andersson_2022_Ods_resG/Torslanda-event-2015-07-28/Torslanda-radar-animation.mp4
 notebooks/data/fencl_2021_Eband_data/Dataset_1.0.0.zip
+notebooks/data/data/andersson_2022_OpenMRG/Torslanda-event-2015-07-28/Torslanda-radar-animation.mp4
+notebooks/data/data/andersson_2022_OpenMRG/Torslanda-event-2015-07-28/Torslanda-interactive-time-series.zip
+notebooks/data/data/andersson_2022_OpenMRG/readme.txt
+notebooks/data/data/andersson_2022_OpenMRG/radar/radar.nc
+notebooks/data/data/andersson_2022_OpenMRG/radar/example_read_radar_nc.py
+notebooks/data/data/andersson_2022_OpenMRG/gauges/smhi/GbgA-71420-metadata.csv
+notebooks/data/data/andersson_2022_OpenMRG/gauges/smhi/GbgA-71420-2015JJA.csv
+notebooks/data/data/andersson_2022_OpenMRG/gauges/city/CityGauges-metadata.csv
+notebooks/data/data/andersson_2022_OpenMRG/gauges/city/CityGauges-2015JJA.csv
+notebooks/data/data/andersson_2022_OpenMRG/cml/example_read_cml.nc.py
+notebooks/data/data/andersson_2022_OpenMRG/cml/cml_metadata.csv
+notebooks/data/data/andersson_2022_OpenMRG/cml/cml.nc
