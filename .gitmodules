@@ -13,3 +13,6 @@
 [submodule "pws-pyqc"]
 	path = pws-pyqc
 	url = https://github.com/AbbasElHachem/pws-pyqc.git
+[submodule "cml_data_explorer"]
+	path = cml_data_explorer
+	url = https://github.com/cchwala/cml_data_explorer.git
