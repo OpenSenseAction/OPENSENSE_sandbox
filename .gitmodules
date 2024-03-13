@@ -10,6 +10,3 @@
 [submodule "PyNNcml"]
 	path = PyNNcml
 	url = https://github.com/haihabi/PyNNcml
-[submodule "pws-pyqc"]
-	path = pws-pyqc
-	url = https://github.com/AbbasElHachem/pws-pyqc.git
